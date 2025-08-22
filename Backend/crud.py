@@ -162,7 +162,17 @@ def soft_delete_status(db: Session, status: BrandStatus):
 
 def seed_statuses(db: Session):
     defaults = [("PENDING","Pendiente"),("ACTIVE","Activa"),("INACTIVE","Inactiva")]
+    current_time = datetime.utcnow()
+    
     for code, label in defaults:
         if not db.query(BrandStatus).filter_by(code=code).first():
-            db.add(BrandStatus(code=code, label=label))
+            # Crear con fechas explícitas para asegurar consistencia
+            status = BrandStatus(
+                code=code, 
+                label=label,
+                created_at=current_time,
+                updated_at=current_time,
+                is_active=True
+            )
+            db.add(status)
     db.commit()

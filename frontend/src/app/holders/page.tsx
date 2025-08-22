@@ -16,6 +16,26 @@ export default function HoldersPage() {
   });
   const pageSize = 10;
 
+  // Helper para formatear fechas de manera segura
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return "Fecha no disponible";
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return "Fecha inválida";
+      }
+      
+      return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return "Fecha inválida";
+    }
+  };
+
   // Consulta de titulares
   const { data: holdersData, isLoading: holdersLoading, isError: holdersError, refetch } = useQuery<Paginated<Holder>>({
     queryKey: ["holders", { search, page, pageSize }],
@@ -262,11 +282,7 @@ export default function HoldersPage() {
                         </td>
                         <td>
                           <span className={styles.dateText}>
-                            {new Date(holder.created_at).toLocaleDateString('es-ES', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric'
-                            })}
+                            {formatDate(holder.created_at)}
                           </span>
                         </td>
                         <td>
