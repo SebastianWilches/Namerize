@@ -205,32 +205,36 @@ erDiagram
 
   BRAND_STATUSES {
     int id PK
-    varchar code "UNIQUE (e.g. ACTIVE)"
-    varchar label
-    boolean is_active "soft delete"
+    string code
+    string label
+    boolean is_active
     datetime created_at
     datetime updated_at
   }
 
   HOLDERS {
     int id PK
-    varchar name
-    varchar legal_identifier "opcional (NIT/RUC/RFC...)"
-    varchar email "opcional"
-    boolean is_active "soft delete"
+    string name
+    string legal_identifier
+    string email
+    boolean is_active
     datetime created_at
     datetime updated_at
   }
 
   BRANDS {
     int id PK
-    varchar name
-    text description
-    int holder_id FK "-> HOLDERS.id"
-    int status_id FK "-> BRAND_STATUSES.id"
-    boolean is_active "soft delete"
+    string name
+    string description
+    int holder_id FK
+    int status_id FK
+    boolean is_active
     datetime created_at
     datetime updated_at
-    UNIQUE (name, holder_id)
   }
 ```
+
+**Notas (fuera del diagrama):**
+- Restricción de unicidad: `UNIQUE (name, holder_id)` en **BRANDS**.
+- `holder_id` → FK a **HOLDERS.id**; `status_id` → FK a **BRAND_STATUSES.id**.
+- Soft delete con `is_active`; timestamps `created_at`, `updated_at`.
