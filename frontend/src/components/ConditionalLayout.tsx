@@ -16,16 +16,21 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
     <div style={{ 
       display: 'grid', 
       gridTemplateColumns: '320px 1fr',
-      minHeight: '100vh',
+      height: '100vh',
       width: '100vw',
       gap: '0',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      position: 'fixed',
+      top: '0',
+      left: '0'
     }}>
       <Sidebar />
       <main style={{ 
         minWidth: '0', 
         width: '100%',
-        overflow: 'auto'
+        height: '100vh',
+        overflow: 'auto',
+        position: 'relative'
       }}>
         {children}
       </main>

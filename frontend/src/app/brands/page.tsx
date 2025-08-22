@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
-import { getJSON, del } from "@/lib/api";
+import { getJSON, del, postJSON } from "@/lib/api";
 import type { Brand, Paginated, Holder, BrandStatus } from "@/types";
 import Link from "next/link";
 import styles from "./brands.module.css";
@@ -9,6 +9,13 @@ import styles from "./brands.module.css";
 export default function BrandsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newBrand, setNewBrand] = useState({
+    name: "",
+    description: "",
+    holder_id: "",
+    status_id: ""
+  });
   const pageSize = 10;
 
   // Consulta de marcas
@@ -26,14 +33,15 @@ export default function BrandsPage() {
   });
 
   // Consulta de titulares para mostrar nombres
+  // Consulta de titulares para dropdown
   const { data: holdersData } = useQuery<Paginated<Holder>>({
-    queryKey: ["holders"],
+    queryKey: ["holders-dropdown"],
     queryFn: () => getJSON<Paginated<Holder>>("holders", { page: 1, page_size: 1000 })
   });
 
-  // Consulta de estados para mostrar etiquetas
+  // Consulta de estados para dropdown
   const { data: statusesData } = useQuery<BrandStatus[]>({
-    queryKey: ["statuses"],
+    queryKey: ["statuses-dropdown"],
     queryFn: () => getJSON<BrandStatus[]>("statuses")
   });
 
@@ -67,6 +75,31 @@ export default function BrandsPage() {
     }
   }
 
+  async function handleCreateBrand(e: React.FormEvent) {
+    e.preventDefault();
+    
+    if (!newBrand.name.trim() || !newBrand.holder_id || !newBrand.status_id) {
+      alert('Nombre, titular y estado son obligatorios');
+      return;
+    }
+
+    try {
+      const payload = {
+        name: newBrand.name.trim(),
+        description: newBrand.description.trim() || null,
+        holder_id: parseInt(newBrand.holder_id),
+        status_id: parseInt(newBrand.status_id)
+      };
+      
+      await postJSON("brands", payload);
+      setNewBrand({ name: "", description: "", holder_id: "", status_id: "" });
+      setShowCreateForm(false);
+      refetch();
+    } catch (error) {
+      alert('Error al crear la marca');
+    }
+  }
+
   const totalPages = brandsData ? Math.max(1, Math.ceil(brandsData.total / brandsData.page_size)) : 1;
 
   return (
@@ -79,14 +112,109 @@ export default function BrandsPage() {
               <h1>Gestión de Marcas</h1>
               <p>Administra tu portafolio de marcas comerciales registradas</p>
             </div>
-            <Link href="/brands/new" className={styles.newBrandButton}>
+            <button
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className={styles.newBrandButton}
+            >
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
               Nueva Marca
-            </Link>
+            </button>
           </div>
         </section>
+
+        {/* Create Form */}
+        {showCreateForm && (
+          <section className={styles.createFormSection}>
+            <div className={styles.formHeader}>
+              <h2 className={styles.formTitle}>Crear Nueva Marca</h2>
+              <button
+                onClick={() => setShowCreateForm(false)}
+                className={styles.closeButton}
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <form onSubmit={handleCreateBrand}>
+              <div className={styles.formGrid}>
+                <div className={styles.formField}>
+                  <label className={styles.formLabel}>Nombre de la Marca *</label>
+                  <input
+                    type="text"
+                    value={newBrand.name}
+                    onChange={(e) => setNewBrand({ ...newBrand, name: e.target.value })}
+                    className={styles.formInput}
+                    placeholder="ej: Coca Cola"
+                    required
+                  />
+                </div>
+                
+                <div className={styles.formField}>
+                  <label className={styles.formLabel}>Titular *</label>
+                  <select
+                    value={newBrand.holder_id}
+                    onChange={(e) => setNewBrand({ ...newBrand, holder_id: e.target.value })}
+                    className={styles.formSelect}
+                    required
+                  >
+                    <option value="">Selecciona un titular</option>
+                    {holdersData?.items.map((holder) => (
+                      <option key={holder.id} value={holder.id}>
+                        {holder.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className={styles.formField}>
+                  <label className={styles.formLabel}>Estado *</label>
+                  <select
+                    value={newBrand.status_id}
+                    onChange={(e) => setNewBrand({ ...newBrand, status_id: e.target.value })}
+                    className={styles.formSelect}
+                    required
+                  >
+                    <option value="">Selecciona un estado</option>
+                    {statusesData?.map((status) => (
+                      <option key={status.id} value={status.id}>
+                        {status.label} ({status.code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className={styles.formField} style={{ gridColumn: '1 / -1' }}>
+                  <label className={styles.formLabel}>Descripción</label>
+                  <textarea
+                    value={newBrand.description}
+                    onChange={(e) => setNewBrand({ ...newBrand, description: e.target.value })}
+                    className={styles.formTextarea}
+                    placeholder="Descripción opcional de la marca"
+                    rows={4}
+                  />
+                </div>
+              </div>
+              <div className={styles.formActions}>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateForm(false)}
+                  className={styles.cancelButton}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className={styles.submitButton}
+                >
+                  Crear Marca
+                </button>
+              </div>
+            </form>
+          </section>
+        )}
 
         {/* Search */}
         <section className={styles.searchSection}>
