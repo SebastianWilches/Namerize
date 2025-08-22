@@ -1,7 +1,6 @@
 # 📦 Namerize – Brand Registry API
 
-**Namerize** es un proyecto de ejemplo construido con **FastAPI + SQLAlchemy** que permite registrar y gestionar **marcas**.  
-Forma parte de una prueba técnica para demostrar habilidades en desarrollo **backend** con Python.
+**Namerize** es un proyecto de ejemplo construido con **FastAPI + SQLAlchemy** que permite registrar y gestionar **marcas**.
 
 ---
 
