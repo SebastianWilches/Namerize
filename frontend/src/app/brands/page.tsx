@@ -22,7 +22,7 @@ export default function BrandsPage() {
   const { data: brandsData, isLoading: brandsLoading, isError: brandsError, refetch } = useQuery<Paginated<Brand>>({
     queryKey: ["brands", { search, page, pageSize }],
     queryFn: () => {
-      const params: Record<string, unknown> = { page, page_size: pageSize };
+      const params: Record<string, string | number | boolean> = { page, page_size: pageSize };
       const trimmed = search.trim();
       if (trimmed !== "") {
         params.search = trimmed;

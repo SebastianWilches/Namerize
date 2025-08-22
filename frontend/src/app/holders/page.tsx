@@ -40,7 +40,7 @@ export default function HoldersPage() {
   const { data: holdersData, isLoading: holdersLoading, isError: holdersError, refetch } = useQuery<Paginated<Holder>>({
     queryKey: ["holders", { search, page, pageSize }],
     queryFn: () => {
-      const params: Record<string, unknown> = { page, page_size: pageSize };
+      const params: Record<string, string | number | boolean> = { page, page_size: pageSize };
       const trimmed = search.trim();
       if (trimmed !== "") {
         params.search = trimmed;
