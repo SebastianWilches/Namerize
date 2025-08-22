@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { getJSON, del } from "@/lib/api";
 import type { Brand, Paginated } from "@/types";
+import Link from "next/link";
 
 export default function BrandsPage() {
   const [search, setSearch] = useState("");
@@ -31,7 +32,7 @@ export default function BrandsPage() {
     <section className="space-y-4">
       <header className="flex items-center justify-between gap-2">
         <h2 className="text-2xl font-semibold">Marcas</h2>
-        <a href="/brands/new" className="rounded-md border px-3 py-2">Nueva marca</a>
+        <Link href="/brands/new" className="rounded-md border px-3 py-2">Nueva marca</Link>
       </header>
 
       <div className="flex gap-2">
@@ -69,7 +70,7 @@ export default function BrandsPage() {
                   <td className="p-2">{b.holder_id}</td>
                   <td className="p-2">{b.status_id}</td>
                   <td className="p-2">
-                    <a className="mr-2 underline" href={`/brands/${b.id}`}>Ver</a>
+                    <Link className="mr-2 underline" href={`/brands/${b.id}`}>Ver</Link>
                     <button className="text-red-600 underline" onClick={() => handleDelete(b.id)}>
                       Eliminar
                     </button>
