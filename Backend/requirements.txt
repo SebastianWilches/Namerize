@@ -1,0 +1,17 @@
+# FastAPI framework principal
+fastapi==0.115.0
+
+# Servidor ASGI (para ejecutar la app)
+uvicorn==0.30.6
+
+# ORM para manejar la base de datos relacional
+SQLAlchemy==2.0.34
+
+# Validación de datos y parsing
+pydantic==2.9.0
+
+# Manejo estructurado de configuración (variables de entorno)
+pydantic-settings==2.4.0
+
+# Cargar variables desde archivo .env
+python-dotenv==1.0.1
