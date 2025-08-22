@@ -1,14 +1,38 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
+from sqlalchemy import or_
 from models import Brand, Holder, BrandStatus
 from schemas import BrandCreate, BrandUpdate, HolderCreate, StatusCreate
 
 # --- Brands ---
-def list_brands(db: Session, include_inactive: bool = False):
-    q = db.query(Brand).order_by(Brand.id.desc())
+def list_brands(
+    db: Session,
+    include_inactive: bool = False,
+    search: str | None = None,
+    page: int = 1,
+    page_size: int = 10,
+):
+    q = db.query(Brand)
     if not include_inactive:
         q = q.filter(Brand.is_active.is_(True))
-    return q.all()
+
+    if search:
+        like = f"%{search}%"
+        q = q.filter(
+            or_(
+                Brand.name.ilike(like),
+                Brand.description.ilike(like)
+            )
+        )
+
+    total = q.count()
+    items = (
+        q.order_by(Brand.id.desc())
+         .offset((page - 1) * page_size)
+         .limit(page_size)
+         .all()
+    )
+    return items, total
 
 def get_brand(db: Session, brand_id: int, include_inactive: bool = False):
     q = db.query(Brand).filter(Brand.id == brand_id)
@@ -26,7 +50,7 @@ def create_brand(db: Session, data: BrandCreate):
 def update_brand(db: Session, brand: Brand, data: BrandUpdate):
     for k, v in data.model_dump(exclude_unset=True).items():
         setattr(brand, k, v)
-    db.commit()  # updated_at se refresca por onupdate
+    db.commit()
     db.refresh(brand)
     return brand
 
@@ -36,11 +60,35 @@ def soft_delete_brand(db: Session, brand: Brand):
     return
 
 # --- Holders ---
-def list_holders(db: Session, include_inactive: bool = False):
-    q = db.query(Holder).order_by(Holder.name.asc())
+def list_holders(
+    db: Session,
+    include_inactive: bool = False,
+    search: str | None = None,
+    page: int = 1,
+    page_size: int = 10,
+):
+    q = db.query(Holder)
     if not include_inactive:
         q = q.filter(Holder.is_active.is_(True))
-    return q.all()
+
+    if search:
+        like = f"%{search}%"
+        q = q.filter(
+            or_(
+                Holder.name.ilike(like),
+                Holder.legal_identifier.ilike(like),
+                Holder.email.ilike(like),
+            )
+        )
+
+    total = q.count()
+    items = (
+        q.order_by(Holder.name.asc())
+         .offset((page - 1) * page_size)
+         .limit(page_size)
+         .all()
+    )
+    return items, total
 
 def get_holder(db: Session, holder_id: int, include_inactive: bool = False):
     q = db.query(Holder).filter(Holder.id == holder_id)

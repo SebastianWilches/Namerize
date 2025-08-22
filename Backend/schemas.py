@@ -49,3 +49,16 @@ class BrandOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     class Config: from_attributes = True
+
+# --- Paginación genérica por recurso ---
+class PaginatedBrands(BaseModel):
+    items: list[BrandOut]
+    page: int
+    page_size: int
+    total: int
+
+class PaginatedHolders(BaseModel):
+    items: list[HolderOut]
+    page: int
+    page_size: int
+    total: int

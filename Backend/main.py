@@ -4,10 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from database import Base, engine, get_db
-from models import Brand  # (opcional: útil si quieres tipar o depurar)
 from schemas import (
-    BrandCreate, BrandUpdate, BrandOut,
-    HolderCreate, HolderOut,
+    BrandCreate, BrandUpdate, BrandOut, PaginatedBrands,
+    HolderCreate, HolderOut, PaginatedHolders,
     StatusCreate, StatusOut
 )
 import crud
@@ -42,12 +41,27 @@ def health():
 #         BRANDS
 # ---------------------------
 
-@app.get("/brands", response_model=list[BrandOut])
+@app.get("/brands", response_model=PaginatedBrands)
 def list_brands(
     include_inactive: bool = Query(False),
+    search: str | None = Query(None, description="Buscar por nombre/descripcion"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
-    return crud.list_brands(db, include_inactive=include_inactive)
+    items, total = crud.list_brands(
+        db,
+        include_inactive=include_inactive,
+        search=search,
+        page=page,
+        page_size=page_size,
+    )
+    return {
+        "items": items,
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+    }
 
 @app.post("/brands", response_model=BrandOut, status_code=201)
 def create_brand(
@@ -104,12 +118,27 @@ def create_holder(
 ):
     return crud.create_holder(db, payload)
 
-@app.get("/holders", response_model=list[HolderOut])
+@app.get("/holders", response_model=PaginatedHolders)
 def list_holders(
     include_inactive: bool = Query(False),
+    search: str | None = Query(None, description="Buscar por nombre, legal_identifier o email"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
-    return crud.list_holders(db, include_inactive=include_inactive)
+    items, total = crud.list_holders(
+        db,
+        include_inactive=include_inactive,
+        search=search,
+        page=page,
+        page_size=page_size,
+    )
+    return {
+        "items": items,
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+    }
 
 @app.delete("/holders/{holder_id}", status_code=204)
 def delete_holder(
