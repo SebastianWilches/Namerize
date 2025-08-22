@@ -32,15 +32,15 @@ export default function BrandsPage() {
     placeholderData: keepPreviousData,
   });
 
-  // Consulta de titulares para mostrar nombres
+
   // Consulta de titulares para dropdown
-  const { data: holdersData } = useQuery<Paginated<Holder>>({
+  const { data: holdersData, isLoading: holdersLoading, isError: holdersError } = useQuery<Paginated<Holder>>({
     queryKey: ["holders-dropdown"],
-    queryFn: () => getJSON<Paginated<Holder>>("holders", { page: 1, page_size: 1000 })
+    queryFn: () => getJSON<Paginated<Holder>>("holders", { include_inactive: true, page: 1, page_size: 100 })
   });
 
   // Consulta de estados para dropdown
-  const { data: statusesData } = useQuery<BrandStatus[]>({
+  const { data: statusesData, isLoading: statusesLoading, isError: statusesError } = useQuery<BrandStatus[]>({
     queryKey: ["statuses-dropdown"],
     queryFn: () => getJSON<BrandStatus[]>("statuses")
   });
@@ -75,10 +75,17 @@ export default function BrandsPage() {
     }
   }
 
+    // Validación del formulario
+  const isFormValid = () => {
+    return newBrand.name.trim() !== "" && 
+           newBrand.holder_id !== "" && 
+           newBrand.status_id !== "";
+  };
+
   async function handleCreateBrand(e: React.FormEvent) {
     e.preventDefault();
     
-    if (!newBrand.name.trim() || !newBrand.holder_id || !newBrand.status_id) {
+    if (!isFormValid()) {
       alert('Nombre, titular y estado son obligatorios');
       return;
     }
@@ -159,9 +166,15 @@ export default function BrandsPage() {
                     onChange={(e) => setNewBrand({ ...newBrand, holder_id: e.target.value })}
                     className={styles.formSelect}
                     required
+                    disabled={holdersLoading}
                   >
-                    <option value="">Selecciona un titular</option>
-                    {holdersData?.items.map((holder) => (
+                    <option value="">
+                      {holdersLoading ? 'Cargando titulares...' : 
+                       holdersError ? 'Error al cargar titulares' :
+                       !holdersData?.items?.length ? 'No hay titulares disponibles' :
+                       'Selecciona un titular'}
+                    </option>
+                    {holdersData?.items?.map((holder) => (
                       <option key={holder.id} value={holder.id}>
                         {holder.name}
                       </option>
@@ -176,8 +189,14 @@ export default function BrandsPage() {
                     onChange={(e) => setNewBrand({ ...newBrand, status_id: e.target.value })}
                     className={styles.formSelect}
                     required
+                    disabled={statusesLoading}
                   >
-                    <option value="">Selecciona un estado</option>
+                    <option value="">
+                      {statusesLoading ? 'Cargando estados...' : 
+                       statusesError ? 'Error al cargar estados' :
+                       !statusesData?.length ? 'No hay estados disponibles' :
+                       'Selecciona un estado'}
+                    </option>
                     {statusesData?.map((status) => (
                       <option key={status.id} value={status.id}>
                         {status.label} ({status.code})
@@ -208,6 +227,11 @@ export default function BrandsPage() {
                 <button
                   type="submit"
                   className={styles.submitButton}
+                  disabled={!isFormValid()}
+                  style={{
+                    opacity: isFormValid() ? 1 : 0.5,
+                    cursor: isFormValid() ? 'pointer' : 'not-allowed'
+                  }}
                 >
                   Crear Marca
                 </button>
@@ -223,9 +247,9 @@ export default function BrandsPage() {
               <svg className={styles.searchIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar por nombre o descripción..."
                 className={styles.searchInput}
               />
@@ -235,8 +259,8 @@ export default function BrandsPage() {
               className={styles.searchButton}
             >
               Buscar
-            </button>
-          </div>
+        </button>
+      </div>
         </section>
 
         {/* Content */}
@@ -272,8 +296,8 @@ export default function BrandsPage() {
                       <th>Estado</th>
                       <th>Fecha</th>
                       <th style={{ textAlign: 'right' }}>Acciones</th>
-                    </tr>
-                  </thead>
+              </tr>
+            </thead>
                   <tbody className={styles.tableBody}>
                     {brandsData.items.map((brand, index) => {
                       const statusInfo = getStatusInfo(brand.status_id);
@@ -326,8 +350,8 @@ export default function BrandsPage() {
                                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
-                                Eliminar
-                              </button>
+                      Eliminar
+                    </button>
                             </div>
                           </td>
                         </tr>
@@ -343,11 +367,11 @@ export default function BrandsPage() {
                             <p className={styles.emptyStateTitle}>No se encontraron marcas</p>
                             <p className={styles.emptyStateText}>Intenta ajustar tu búsqueda o crear una nueva marca</p>
                           </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
               </div>
 
               {/* Pagination */}
@@ -357,35 +381,35 @@ export default function BrandsPage() {
                     Mostrando {Math.min((page - 1) * pageSize + 1, brandsData.total)} - {Math.min(page * pageSize, brandsData.total)} de {brandsData.total} marcas
                   </div>
                   <div className={styles.paginationControls}>
-                    <button
-                      disabled={page <= 1}
+            <button
+              disabled={page <= 1}
                       onClick={() => setPage(p => p - 1)}
                       className={styles.paginationButton}
-                    >
+            >
                       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
-                      Anterior
-                    </button>
+              Anterior
+            </button>
                     <span className={styles.pageInfo}>
                       Página {page} de {totalPages}
-                    </span>
-                    <button
+            </span>
+            <button
                       disabled={page >= totalPages}
                       onClick={() => setPage(p => p + 1)}
                       className={styles.paginationButton}
-                    >
-                      Siguiente
+            >
+              Siguiente
                       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
-                    </button>
-                  </div>
+            </button>
+          </div>
                 </div>
               )}
-            </>
+        </>
           )}
-        </section>
+    </section>
       </div>
     </div>
   );

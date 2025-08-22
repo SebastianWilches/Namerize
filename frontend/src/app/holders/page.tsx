@@ -41,18 +41,26 @@ export default function HoldersPage() {
     }
   }
 
+  // Validación del formulario
+  const isFormValid = () => {
+    return newHolder.name.trim() !== "" && 
+           newHolder.legal_identifier.trim() !== "" && 
+           newHolder.email.trim() !== "";
+  };
+
   async function handleCreateHolder(e: React.FormEvent) {
     e.preventDefault();
-    if (!newHolder.name.trim()) {
-      alert('El nombre es obligatorio');
+    
+    if (!isFormValid()) {
+      alert('Todos los campos son obligatorios');
       return;
     }
 
     try {
       const payload = {
         name: newHolder.name.trim(),
-        legal_identifier: newHolder.legal_identifier.trim() || null,
-        email: newHolder.email.trim() || null
+        legal_identifier: newHolder.legal_identifier.trim(),
+        email: newHolder.email.trim()
       };
       
       await postJSON("holders", payload);
@@ -116,23 +124,25 @@ export default function HoldersPage() {
                   />
                 </div>
                 <div className={styles.formField}>
-                  <label className={styles.formLabel}>Identificación Legal</label>
+                  <label className={styles.formLabel}>Identificación Legal *</label>
                   <input
                     type="text"
                     value={newHolder.legal_identifier}
                     onChange={(e) => setNewHolder({ ...newHolder, legal_identifier: e.target.value })}
                     className={styles.formInput}
                     placeholder="NIT, RUC, RFC, etc."
+                    required
                   />
                 </div>
                 <div className={styles.formField}>
-                  <label className={styles.formLabel}>Email</label>
+                  <label className={styles.formLabel}>Email *</label>
                   <input
                     type="email"
                     value={newHolder.email}
                     onChange={(e) => setNewHolder({ ...newHolder, email: e.target.value })}
                     className={styles.formInput}
                     placeholder="correo@ejemplo.com"
+                    required
                   />
                 </div>
               </div>
@@ -147,6 +157,11 @@ export default function HoldersPage() {
                 <button
                   type="submit"
                   className={styles.submitButton}
+                  disabled={!isFormValid()}
+                  style={{
+                    opacity: isFormValid() ? 1 : 0.5,
+                    cursor: isFormValid() ? 'pointer' : 'not-allowed'
+                  }}
                 >
                   Crear Titular
                 </button>

@@ -29,9 +29,16 @@ export default function StatusesPage() {
     }
   }
 
+  // Validación del formulario
+  const isFormValid = () => {
+    return newStatus.code.trim() !== "" && 
+           newStatus.label.trim() !== "";
+  };
+
   async function handleCreateStatus(e: React.FormEvent) {
     e.preventDefault();
-    if (!newStatus.code.trim() || !newStatus.label.trim()) {
+    
+    if (!isFormValid()) {
       alert('El código y la etiqueta son obligatorios');
       return;
     }
@@ -133,6 +140,11 @@ export default function StatusesPage() {
                 <button
                   type="submit"
                   className={styles.submitButton}
+                  disabled={!isFormValid()}
+                  style={{
+                    opacity: isFormValid() ? 1 : 0.5,
+                    cursor: isFormValid() ? 'pointer' : 'not-allowed'
+                  }}
                 >
                   Crear Estado
                 </button>

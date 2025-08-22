@@ -15,7 +15,7 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
   return (
     <div style={{ 
       display: 'grid', 
-      gridTemplateColumns: '320px 1fr',
+      gridTemplateColumns: '280px 1fr',
       height: '100vh',
       width: '100vw',
       gap: '0',

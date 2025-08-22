@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from sqlalchemy import or_
@@ -50,12 +51,16 @@ def create_brand(db: Session, data: BrandCreate):
 def update_brand(db: Session, brand: Brand, data: BrandUpdate):
     for k, v in data.model_dump(exclude_unset=True).items():
         setattr(brand, k, v)
+    # Asegurar que se actualice el timestamp
+    brand.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(brand)
     return brand
 
 def soft_delete_brand(db: Session, brand: Brand):
     brand.is_active = False
+    # Actualizar timestamp al hacer soft delete
+    brand.updated_at = datetime.utcnow()
     db.commit()
     return
 
@@ -103,8 +108,19 @@ def create_holder(db: Session, data: HolderCreate):
     db.refresh(holder)
     return holder
 
+def update_holder(db: Session, holder: Holder, data: HolderCreate):
+    for k, v in data.model_dump(exclude_unset=True).items():
+        setattr(holder, k, v)
+    # Asegurar que se actualice el timestamp
+    holder.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(holder)
+    return holder
+
 def soft_delete_holder(db: Session, holder: Holder):
     holder.is_active = False
+    # Actualizar timestamp al hacer soft delete
+    holder.updated_at = datetime.utcnow()
     db.commit()
     return
 
@@ -128,8 +144,19 @@ def create_status(db: Session, data: StatusCreate):
     db.refresh(status)
     return status
 
+def update_status(db: Session, status: BrandStatus, data: StatusCreate):
+    for k, v in data.model_dump(exclude_unset=True).items():
+        setattr(status, k, v)
+    # Asegurar que se actualice el timestamp
+    status.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(status)
+    return status
+
 def soft_delete_status(db: Session, status: BrandStatus):
     status.is_active = False
+    # Actualizar timestamp al hacer soft delete
+    status.updated_at = datetime.utcnow()
     db.commit()
     return
 
