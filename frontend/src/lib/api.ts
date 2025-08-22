@@ -1,9 +1,15 @@
 import ky from "ky";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+// Fallback para desarrollo local
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+
+// Debug: mostrar todas las variables de entorno que empiecen con NEXT_PUBLIC_
+console.log("🔍 Debug variables de entorno:");
+console.log("NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
+console.log("API_URL final:", API_URL);
+console.log("Todas las env vars:", Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC_')));
 
 if (!API_URL) {
-  // Esto se resuelve en build; si ves este error en consola, el .env no fue tomado.
   throw new Error(
     "NEXT_PUBLIC_API_URL no está definido. Crea frontend/.env.local y reinicia el servidor."
   );
