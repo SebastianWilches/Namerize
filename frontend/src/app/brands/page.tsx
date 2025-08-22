@@ -22,7 +22,7 @@ export default function BrandsPage() {
   const { data: brandsData, isLoading: brandsLoading, isError: brandsError, refetch } = useQuery<Paginated<Brand>>({
     queryKey: ["brands", { search, page, pageSize }],
     queryFn: () => {
-      const params: Record<string, any> = { page, page_size: pageSize };
+      const params: Record<string, unknown> = { page, page_size: pageSize };
       const trimmed = search.trim();
       if (trimmed !== "") {
         params.search = trimmed;
@@ -55,21 +55,14 @@ export default function BrandsPage() {
     return status || { code: 'UNKNOWN', label: 'Desconocido' };
   };
 
-  const getStatusBadgeClass = (code: string) => {
-    switch (code) {
-      case 'ACTIVE': return 'bg-green-100 text-green-800 border-green-200';
-      case 'PENDING': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'INACTIVE': return 'bg-gray-100 text-gray-800 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
+  // Función helper para clases de badges (removida para evitar warning de variable no usada)
 
   async function handleDelete(id: number, name: string) {
     if (confirm(`¿Estás seguro de que deseas eliminar la marca "${name}"?`)) {
       try {
         await del(`brands/${id}`);
         refetch();
-      } catch (error) {
+      } catch {
         alert('Error al eliminar la marca');
       }
     }
@@ -102,9 +95,9 @@ export default function BrandsPage() {
       setNewBrand({ name: "", description: "", holder_id: "", status_id: "" });
       setShowCreateForm(false);
       refetch();
-    } catch (error) {
-      alert('Error al crear la marca');
-    }
+          } catch {
+        alert('Error al crear la marca');
+      }
   }
 
   const totalPages = brandsData ? Math.max(1, Math.ceil(brandsData.total / brandsData.page_size)) : 1;

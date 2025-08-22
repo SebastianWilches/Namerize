@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { getJSON, putJSON } from "@/lib/api";
 import type { Brand, Holder, BrandStatus, Paginated } from "@/types";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 
 interface Params {
@@ -12,7 +11,6 @@ interface Params {
 }
 
 export default function BrandDetailPage({ params }: Params) {
-  const router = useRouter();
   const resolvedParams = use(params);
   const brandId = parseInt(resolvedParams.id);
   const [isEditing, setIsEditing] = useState(false);
@@ -99,7 +97,7 @@ export default function BrandDetailPage({ params }: Params) {
       setIsEditing(false);
       refetch();
       alert('Marca actualizada exitosamente');
-    } catch (error) {
+    } catch {
       alert('Error al actualizar la marca');
     }
   }

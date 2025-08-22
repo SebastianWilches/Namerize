@@ -23,7 +23,7 @@ export default function StatusesPage() {
       try {
         await del(`statuses/${id}`);
         refetch();
-      } catch (error) {
+      } catch {
         alert('Error al eliminar el estado');
       }
     }
@@ -53,7 +53,7 @@ export default function StatusesPage() {
       setNewStatus({ code: "", label: "" });
       setShowCreateForm(false);
       refetch();
-    } catch (error) {
+    } catch {
       alert('Error al crear el estado. Verifica que el código no esté duplicado.');
     }
   }

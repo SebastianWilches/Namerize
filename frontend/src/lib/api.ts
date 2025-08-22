@@ -26,13 +26,13 @@ export const api = ky.create({
 });
 
 // Helpers: usa rutas relativas sin "/" al inicio
-export async function getJSON<T>(input: string, searchParams?: Record<string, any>): Promise<T> {
+export async function getJSON<T>(input: string, searchParams?: Record<string, unknown>): Promise<T> {
   return api.get(input.replace(/^\/+/, ""), { searchParams }).json<T>();
 }
-export async function postJSON<T>(input: string, json: any): Promise<T> {
+export async function postJSON<T>(input: string, json: unknown): Promise<T> {
   return api.post(input.replace(/^\/+/, ""), { json }).json<T>();
 }
-export async function putJSON<T>(input: string, json: any): Promise<T> {
+export async function putJSON<T>(input: string, json: unknown): Promise<T> {
   return api.put(input.replace(/^\/+/, ""), { json }).json<T>();
 }
 export async function del(input: string): Promise<void> {

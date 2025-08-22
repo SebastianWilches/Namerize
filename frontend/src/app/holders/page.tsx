@@ -31,7 +31,7 @@ export default function HoldersPage() {
         month: 'short',
         day: 'numeric'
       });
-    } catch (error) {
+    } catch {
       return "Fecha inválida";
     }
   };
@@ -40,7 +40,7 @@ export default function HoldersPage() {
   const { data: holdersData, isLoading: holdersLoading, isError: holdersError, refetch } = useQuery<Paginated<Holder>>({
     queryKey: ["holders", { search, page, pageSize }],
     queryFn: () => {
-      const params: Record<string, any> = { page, page_size: pageSize };
+      const params: Record<string, unknown> = { page, page_size: pageSize };
       const trimmed = search.trim();
       if (trimmed !== "") {
         params.search = trimmed;
@@ -55,7 +55,7 @@ export default function HoldersPage() {
       try {
         await del(`holders/${id}`);
         refetch();
-      } catch (error) {
+      } catch {
         alert('Error al eliminar el titular');
       }
     }
@@ -87,7 +87,7 @@ export default function HoldersPage() {
       setNewHolder({ name: "", legal_identifier: "", email: "" });
       setShowCreateForm(false);
       refetch();
-    } catch (error) {
+    } catch {
       alert('Error al crear el titular');
     }
   }
