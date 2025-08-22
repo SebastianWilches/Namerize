@@ -3,11 +3,10 @@ import ky from "ky";
 // Fallback para desarrollo local
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
-// Debug: mostrar todas las variables de entorno que empiecen con NEXT_PUBLIC_
-console.log("🔍 Debug variables de entorno:");
-console.log("NEXT_PUBLIC_API_URL:", process.env.NEXT_PUBLIC_API_URL);
-console.log("API_URL final:", API_URL);
-console.log("Todas las env vars:", Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC_')));
+// Solo mostrar warning en desarrollo si no está configurada la variable
+if (!process.env.NEXT_PUBLIC_API_URL && process.env.NODE_ENV === 'development') {
+  console.warn("⚠️ NEXT_PUBLIC_API_URL no está definido, usando fallback:", API_URL);
+}
 
 if (!API_URL) {
   throw new Error(
