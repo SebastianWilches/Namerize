@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from database import Base, engine, get_db
 from models import Brand
@@ -38,51 +39,46 @@ def health():
 
 # --- Brands ---
 @app.get("/brands", response_model=list[BrandOut])
-def list_brands(db: Session = Depends(get_db)):
-    return crud.list_brands(db)
-
-@app.post("/brands", response_model=BrandOut, status_code=201)
-def create_brand(payload: BrandCreate, db: Session = Depends(get_db)):
-    return crud.create_brand(db, payload)
+def list_brands(include_inactive: bool = Query(False), db: Session = Depends(get_db)):
+    return crud.list_brands(db, include_inactive=include_inactive)
 
 @app.get("/brands/{brand_id}", response_model=BrandOut)
-def get_brand(brand_id: int, db: Session = Depends(get_db)):
-    brand = crud.get_brand(db, brand_id)
+def get_brand(brand_id: int, include_inactive: bool = Query(False), db: Session = Depends(get_db)):
+    brand = crud.get_brand(db, brand_id, include_inactive=include_inactive)
     if not brand:
         raise HTTPException(status_code=404, detail="Brand not found")
     return brand
 
-@app.put("/brands/{brand_id}", response_model=BrandOut)
-def update_brand(brand_id: int, payload: BrandUpdate, db: Session = Depends(get_db)):
-    brand = crud.get_brand(db, brand_id)
-    if not brand:
-        raise HTTPException(status_code=404, detail="Brand not found")
-    if payload.name == "":
-        raise HTTPException(status_code=400, detail="'name' cannot be empty")
-    return crud.update_brand(db, brand, payload)
-
 @app.delete("/brands/{brand_id}", status_code=204)
 def delete_brand(brand_id: int, db: Session = Depends(get_db)):
-    brand = crud.get_brand(db, brand_id)
+    brand = crud.get_brand(db, brand_id, include_inactive=True)  # permitir borrar aunque esté inactiva/activa
     if not brand:
         raise HTTPException(status_code=404, detail="Brand not found")
-    crud.delete_brand(db, brand)
+    crud.soft_delete_brand(db, brand)
     return
 
 # --- Holders ---
-@app.post("/holders", response_model=HolderOut, status_code=201)
-def create_holder(payload: HolderCreate, db: Session = Depends(get_db)):
-    return crud.create_holder(db, payload)
-
 @app.get("/holders", response_model=list[HolderOut])
-def list_holders(db: Session = Depends(get_db)):
-    return crud.list_holders(db)
+def list_holders(include_inactive: bool = Query(False), db: Session = Depends(get_db)):
+    return crud.list_holders(db, include_inactive=include_inactive)
+
+@app.delete("/holders/{holder_id}", status_code=204)
+def delete_holder(holder_id: int, db: Session = Depends(get_db)):
+    holder = crud.get_holder(db, holder_id, include_inactive=True)
+    if not holder:
+        raise HTTPException(status_code=404, detail="Holder not found")
+    crud.soft_delete_holder(db, holder)
+    return
 
 # --- Statuses ---
-@app.post("/statuses", response_model=StatusOut, status_code=201)
-def create_status(payload: StatusCreate, db: Session = Depends(get_db)):
-    return crud.create_status(db, payload)
-
 @app.get("/statuses", response_model=list[StatusOut])
-def list_statuses(db: Session = Depends(get_db)):
-    return crud.list_statuses(db)
+def list_statuses(include_inactive: bool = Query(False), db: Session = Depends(get_db)):
+    return crud.list_statuses(db, include_inactive=include_inactive)
+
+@app.delete("/statuses/{status_id}", status_code=204)
+def delete_status(status_id: int, db: Session = Depends(get_db)):
+    status = crud.get_status(db, status_id, include_inactive=True)
+    if not status:
+        raise HTTPException(status_code=404, detail="Status not found")
+    crud.soft_delete_status(db, status)
+    return

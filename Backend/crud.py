@@ -1,13 +1,20 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 from models import Brand, Holder, BrandStatus
 from schemas import BrandCreate, BrandUpdate, HolderCreate, StatusCreate
 
 # --- Brands ---
-def list_brands(db: Session):
-    return db.query(Brand).order_by(Brand.id.desc()).all()
+def list_brands(db: Session, include_inactive: bool = False):
+    q = db.query(Brand).order_by(Brand.id.desc())
+    if not include_inactive:
+        q = q.filter(Brand.is_active.is_(True))
+    return q.all()
 
-def get_brand(db: Session, brand_id: int):
-    return db.query(Brand).filter(Brand.id == brand_id).first()
+def get_brand(db: Session, brand_id: int, include_inactive: bool = False):
+    q = db.query(Brand).filter(Brand.id == brand_id)
+    if not include_inactive:
+        q = q.filter(Brand.is_active.is_(True))
+    return q.first()
 
 def create_brand(db: Session, data: BrandCreate):
     brand = Brand(**data.model_dump())
@@ -19,15 +26,28 @@ def create_brand(db: Session, data: BrandCreate):
 def update_brand(db: Session, brand: Brand, data: BrandUpdate):
     for k, v in data.model_dump(exclude_unset=True).items():
         setattr(brand, k, v)
-    db.commit()
+    db.commit()  # updated_at se refresca por onupdate
     db.refresh(brand)
     return brand
 
-def delete_brand(db: Session, brand: Brand):
-    db.delete(brand)
+def soft_delete_brand(db: Session, brand: Brand):
+    brand.is_active = False
     db.commit()
+    return
 
 # --- Holders ---
+def list_holders(db: Session, include_inactive: bool = False):
+    q = db.query(Holder).order_by(Holder.name.asc())
+    if not include_inactive:
+        q = q.filter(Holder.is_active.is_(True))
+    return q.all()
+
+def get_holder(db: Session, holder_id: int, include_inactive: bool = False):
+    q = db.query(Holder).filter(Holder.id == holder_id)
+    if not include_inactive:
+        q = q.filter(Holder.is_active.is_(True))
+    return q.first()
+
 def create_holder(db: Session, data: HolderCreate):
     holder = Holder(**data.model_dump())
     db.add(holder)
@@ -35,16 +55,23 @@ def create_holder(db: Session, data: HolderCreate):
     db.refresh(holder)
     return holder
 
-def list_holders(db: Session):
-    return db.query(Holder).order_by(Holder.name.asc()).all()
+def soft_delete_holder(db: Session, holder: Holder):
+    holder.is_active = False
+    db.commit()
+    return
 
 # --- Statuses ---
-def seed_statuses(db: Session):
-    defaults = [("PENDING","Pendiente"),("ACTIVE","Activa"),("INACTIVE","Inactiva")]
-    for code, label in defaults:
-        if not db.query(BrandStatus).filter_by(code=code).first():
-            db.add(BrandStatus(code=code, label=label))
-    db.commit()
+def list_statuses(db: Session, include_inactive: bool = False):
+    q = db.query(BrandStatus).order_by(BrandStatus.id.asc())
+    if not include_inactive:
+        q = q.filter(BrandStatus.is_active.is_(True))
+    return q.all()
+
+def get_status(db: Session, status_id: int, include_inactive: bool = False):
+    q = db.query(BrandStatus).filter(BrandStatus.id == status_id)
+    if not include_inactive:
+        q = q.filter(BrandStatus.is_active.is_(True))
+    return q.first()
 
 def create_status(db: Session, data: StatusCreate):
     status = BrandStatus(**data.model_dump())
@@ -53,5 +80,14 @@ def create_status(db: Session, data: StatusCreate):
     db.refresh(status)
     return status
 
-def list_statuses(db: Session):
-    return db.query(BrandStatus).order_by(BrandStatus.id.asc()).all()
+def soft_delete_status(db: Session, status: BrandStatus):
+    status.is_active = False
+    db.commit()
+    return
+
+def seed_statuses(db: Session):
+    defaults = [("PENDING","Pendiente"),("ACTIVE","Activa"),("INACTIVE","Inactiva")]
+    for code, label in defaults:
+        if not db.query(BrandStatus).filter_by(code=code).first():
+            db.add(BrandStatus(code=code, label=label))
+    db.commit()

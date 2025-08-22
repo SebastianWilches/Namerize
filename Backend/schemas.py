@@ -4,13 +4,16 @@ from pydantic import BaseModel, Field
 # Holders
 class HolderBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=200)
-    tax_id: str | None = None
+    legal_identifier: str | None = None   
     email: str | None = None
 
-class HolderCreate(HolderBase): pass
+class HolderCreate(HolderBase): 
+    pass
+
 class HolderOut(HolderBase):
     id: int
-    class Config: from_attributes = True
+    class Config: 
+        from_attributes = True
 
 # Statuses
 class StatusBase(BaseModel):
