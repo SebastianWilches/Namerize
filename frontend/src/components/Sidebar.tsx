@@ -87,7 +87,7 @@ export default function Sidebar() {
               <div className={styles.statusIndicator}></div>
               Sistema activo
             </p>
-            <p>© 2024 Namerize</p>
+            <p>Elaborado por: Sebastian Wilches</p>
           </div>
         </div>
       </div>

@@ -11,11 +11,24 @@ export default function ConditionalLayout({ children }: { children: React.ReactN
     return <>{children}</>;
   }
 
-  // Páginas internas - con sidebar
+  // Páginas internas - con sidebar usando todo el viewport
   return (
-    <div className="mx-auto max-w-7xl p-6 grid gap-6 lg:grid-cols-[280px_1fr]">
+    <div style={{ 
+      display: 'grid', 
+      gridTemplateColumns: '320px 1fr',
+      minHeight: '100vh',
+      width: '100vw',
+      gap: '0',
+      overflow: 'hidden'
+    }}>
       <Sidebar />
-      <main className="min-w-0">{children}</main>
+      <main style={{ 
+        minWidth: '0', 
+        width: '100%',
+        overflow: 'auto'
+      }}>
+        {children}
+      </main>
     </div>
   );
 }
