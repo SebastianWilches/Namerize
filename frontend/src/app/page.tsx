@@ -9,16 +9,18 @@ export default function Home() {
   });
 
   return (
-    <section className="space-y-4">
-      <h1 className="text-3xl font-bold">Namerize</h1>
-      {isLoading && <p>Cargando estado del servidor…</p>}
-      {isError && <p className="text-red-600">No se pudo conectar con el backend.</p>}
-      {data && <p>Backend: {data.status}</p>}
+    <section className="space-y-6">
+      <h1 className="text-3xl font-bold tracking-tight">Namerize</h1>
+      <div className="space-y-4">
+        {isLoading && <p>Cargando estado del servidor…</p>}
+        {isError && <p className="text-red-600">No se pudo conectar con el backend.</p>}
+        {data && <p>Backend: {data.status}</p>}
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <a className="rounded-lg border p-4 hover:bg-white" href="/brands">Marcas</a>
-        <a className="rounded-lg border p-4 hover:bg-white" href="/holders">Titulares</a>
-        <a className="rounded-lg border p-4 hover:bg-white" href="/statuses">Estados</a>
+        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+          <p className="text-sm text-gray-600">
+            Selecciona una opción en el menú de la izquierda para continuar.
+          </p>
+        </div>
       </div>
     </section>
   );
